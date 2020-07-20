@@ -1,0 +1,33 @@
+syntax ="proto3";
+
+package com.bbstone.comm.proto;
+
+option optimize_for = SPEED;
+option java_package = "com.bbstone.comm.proto";
+option java_outer_classname="CmdMsg";
+
+message CmdReq{
+    string id = 1;
+    string cmd = 2;
+    string data = 3;
+    
+    string connId = 4;
+    uint64 reqTs = 5;
+    string accessToken = 6;
+    uint64 createTs = 7;
+}
+
+message CmdRsp{
+    string id = 1;
+    string cmd = 2;
+    int32 retCode=3;
+    string retMsg=4;
+    string retData=5;
+    
+    uint64 reqTs = 6;
+    uint64 recvTs = 7;
+    uint64 rspTs = 8;
+    string connId = 9;
+    string accessToken = 10;
+    uint64 createTs = 11;
+}

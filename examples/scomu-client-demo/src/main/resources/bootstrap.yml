@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: scomu-client-demo
+logging:
+  config:
+    classpath:logback-spring.xml
