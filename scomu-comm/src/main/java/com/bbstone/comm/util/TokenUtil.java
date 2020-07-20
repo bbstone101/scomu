@@ -19,9 +19,5 @@ public class TokenUtil {
 		return UUID.randomUUID().toString();
 	}
 
-	public static void main(String[] args) {
-
-		System.out.println(UUID32());
-	}
 
 }
