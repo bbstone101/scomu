@@ -7,7 +7,15 @@ socket通信的客户端和服务端的通用库，基于Netty和ProtoBuf。
 
 ![scomu sequence diagram](https://images.gitee.com/uploads/images/2020/0722/131812_8b6303e5_7784580.jpeg "scomu-sd.JPG")
 
-##### 软件架构说明
+#### 软件架构说明
+
+
+
+
+
+
+
+
 
 #### 安装教程
 
@@ -39,7 +47,8 @@ socket通信的客户端和服务端的通用库，基于Netty和ProtoBuf。
 
 #### Roadmap
 
-    1. 通过访问redis获取用户密码留了placehold，代码没有实现
+
+    1. 通过访问redis获取用户密码 （留了placehold，代码未实现）
     2. server验证srvRandAnswer通过后生成的accessToken保存Redis（未实现）
     3. 
 
