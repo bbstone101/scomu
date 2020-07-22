@@ -4,8 +4,10 @@
 socket通信的客户端和服务端的通用库，基于Netty和ProtoBuf。
 
 #### 软件架构
-软件架构说明
-![scomu sequence diagram](https://images.gitee.com/uploads/images/2020/0722/114351_2d2a35f4_7784580.png "屏幕截图.png")
+
+![scomu sequence diagram](https://images.gitee.com/uploads/images/2020/0722/131120_8d214d75_7784580.png "屏幕截图.png")
+
+##### 软件架构说明
 
 #### 安装教程
 
