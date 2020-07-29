@@ -32,3 +32,6 @@ build/
 
 ### Mac ###
 .DS_Store
+
+### Eclipse ###
+.metadata/
