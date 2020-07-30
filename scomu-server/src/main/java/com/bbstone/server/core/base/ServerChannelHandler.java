@@ -1,4 +1,4 @@
-package com.bbstone.server.core;
+package com.bbstone.server.core.base;
 
 import com.alibaba.fastjson.JSON;
 import com.bbstone.comm.model.CmdReqEvent;

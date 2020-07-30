@@ -1,5 +1,8 @@
 package com.bbstone.client.core;
 
+import java.util.List;
+
+import com.bbstone.client.core.base.ClientConfig;
 import com.bbstone.client.core.model.ConnStatus;
 import com.bbstone.comm.ConfigConst;
 import com.bbstone.comm.model.ConnInfo;
@@ -38,7 +41,7 @@ public class ClientProcessor {
 	public void processInactive(ChannelHandlerContext ctx, ConnInfo connInfo) {
 		ClientContextHolder.getContext(connInfo.connId()).rejectCmd();
 	}
-	
+
 	public void processInactiveByClose(ChannelHandlerContext ctx, ConnInfo connInfo) {
 		ClientContextHolder.getContext(connInfo.connId()).rejectCmd();
 		ClientContextHolder.getClientSession(connInfo.connId()).clearSession();
@@ -67,18 +70,19 @@ public class ClientProcessor {
 			ClientContextHolder.getHeartBeatExecutor(connId).keepAlived(connId);
 		}
 
-		// notify connect wait for complete threads
+		// notify connect threads which waiting for complete
 		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.CONNECTED);
 		// update client session connection status
-		ClientContextHolder.getClientConnector(connId).updateConnStatus(connId, ConnStatus.CONNECTED);
+		ClientContextHolder.getClientConnector(connId).updateConnStatus(ConnStatus.CONNECTED);
 
 		log.debug("auth success, connection is ready for transmitting commands...");
 		// execute authSuccessListeners
-//		List<AuthSuccessListener> authSuccessListeners = ClientSession.getAuthSuccessListeners(connId);
-//		log.info("notify auth success listeners(total: {}).", authSuccessListeners.size());
-//		for (AuthSuccessListener listener : authSuccessListeners) {
-//			listener.invoke(ctx);
-//		}
+		List<AuthSuccessListener> authSuccessListeners = ClientContextHolder.getClientSession(connId)
+				.getAuthSuccessListeners();
+		log.info("notify auth success listeners(total: {}).", authSuccessListeners.size());
+		for (AuthSuccessListener listener : authSuccessListeners) {
+			listener.invoke(ctx);
+		}
 
 		// execute authSucess Schedulers
 //		List<Scheduler> schedulers = ClientSession.getAuthSucessSchedulers(connId);
@@ -88,6 +92,32 @@ public class ClientProcessor {
 //			log.info("try to schedule one task at fixed rate ....");
 //			scheduler.getScheduledExecutorService().scheduleAtFixedRate(scheduler.getCommand(), scheduler.getInitialDelay(), scheduler.getPeriod(), scheduler.getUnit());
 //		}
+	}
+
+	/**
+	 * client check server info not passed(connect to fake server)
+	 * @param ctx
+	 * @param connId
+	 */
+	public void processAuthRejectByClient(ChannelHandlerContext ctx, String connId) {
+		// nodify auth req to release lock(wait)
+		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.FAKE_SERVER);
+		ClientContextHolder.getClientConnector(connId).updateConnStatus(ConnStatus.AUTH_FAIL);
+
+	}
+
+	/**
+	 * server check client connection info not passed
+	 * @param ctx
+	 * @param connId
+	 */
+	public void processAuthRejectByServer(ChannelHandlerContext ctx, String connId) {
+//		clientContext.removeClientAuthInfo(connInfo.connId());
+		// notify connect wait for complete threads
+		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.AUTH_FAIL);
+		ClientContextHolder.getClientConnector(connId).updateConnStatus(ConnStatus.AUTH_FAIL);
+		// close connection
+		ConnectionManager.close(connId);
 	}
 
 }

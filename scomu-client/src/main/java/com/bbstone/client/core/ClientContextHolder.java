@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.bbstone.client.core.base.Client;
+import com.bbstone.client.core.base.Connector;
+import com.bbstone.client.core.base.MessageDispatcher;
+
 public class ClientContextHolder {
 
 	private static Map<String, ClientContext> clientContexts = new HashMap<>();
@@ -28,6 +32,9 @@ public class ClientContextHolder {
 	// --------------
 	public static Connector getClientConnector(String connId) {
 		return getContext(connId).getClientConnector();
+	}
+	public static Client getClientConnection(String connId) {
+		return getClientSession(connId).getConnection();
 	}
 	public static ClientProcessor getClientProcessor(String connId) {
 		return getContext(connId).getClientProcessor();

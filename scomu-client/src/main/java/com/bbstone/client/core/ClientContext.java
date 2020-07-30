@@ -1,7 +1,13 @@
 package com.bbstone.client.core;
 
+import com.bbstone.client.core.base.ClientConfig;
+import com.bbstone.client.core.base.Connector;
+import com.bbstone.client.core.base.MessageDispatcher;
+import com.bbstone.client.core.exception.AuthException;
 import com.bbstone.client.core.model.CmdEvent;
+import com.bbstone.client.core.model.CmdEventFactory;
 import com.bbstone.client.core.model.Statis;
+import com.bbstone.client.util.ClientUtil;
 import com.bbstone.comm.enums.RetCode;
 import com.bbstone.comm.model.ClientAuthInfo;
 import com.bbstone.comm.model.CmdReqEvent;
@@ -38,6 +44,8 @@ public class ClientContext {
 
 	private Statis statis;
 	private ClientAuthInfo clientAuthInfo;
+	
+//	private List<AuthSuccessListener> authSuccessListeners = new ArrayList<>();
 
 	ClientContext(String connId) {
 		this.connId = connId;
@@ -166,6 +174,17 @@ public class ClientContext {
 	public ClientAuthInfo getClientAuthInfo() {
 		return clientAuthInfo;
 	}
+	
+	
+//	public List<AuthSuccessListener> getAuthSuccessListeners() {
+//		return this.authSuccessListeners;
+//	}
+//	
+//	public void addAuthSuccessListener(AuthSuccessListener listener) {
+//		this.authSuccessListeners.add(listener);
+//	}
+	
+	// ------------------------------ req process
 
 	/**
 	 * used ChannelHandlerContext to write, msg flow from next handler(write: next
@@ -173,15 +192,23 @@ public class ClientContext {
 	 * tail(write: tail -> head, read: head -> tail),
 	 * 
 	 * @param cmdReqEvent
+	 * @throws AuthException 
 	 */
 	public CmdResult sendReq(CmdReqEvent cmdReqEvent) {
 
 //		SocketChannel sc = ClientSession.getSocketChannel(connId);
 		ChannelHandlerContext ctx = clientSession.getChannelHandlerCtx();
 
-		CmdReq cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
-//		sc.writeAndFlush(cmdReq);
-		ctx.writeAndFlush(cmdReq);
+		CmdReq cmdReq = null;
+		try {
+			cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
+//			sc.writeAndFlush(cmdReq);
+//			ctx.writeAndFlush(cmdReq);
+			ClientUtil.sendReq(ctx, cmdReq);
+		} catch (AuthException e1) {
+			log.error("send command request error.", e1);
+			return CmdResult.from(RetCode.FAIL.code(), RetCode.FAIL.descp());
+		}
 
 		CmdEvent cmdEvent = CmdEventFactory.newInstance();
 		cmdEvent.setCmdId(cmdReqEvent.getId());
@@ -209,11 +236,18 @@ public class ClientContext {
 	 * 
 	 * @param cmdReqEvent
 	 * @return
+	 * @throws AuthException 
 	 */
 	public void sendReqOnly(CmdReqEvent cmdReqEvent) {
 		ChannelHandlerContext ctx = clientSession.getChannelHandlerCtx();
-		CmdReq cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
-		ctx.writeAndFlush(cmdReq);
+		CmdReq cmdReq;
+		try {
+			cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
+//			ctx.writeAndFlush(cmdReq);
+			ClientUtil.sendReq(ctx, cmdReq);
+		} catch (AuthException e) {
+			log.error("send command request error.", e);
+		}
 		
 	}
 

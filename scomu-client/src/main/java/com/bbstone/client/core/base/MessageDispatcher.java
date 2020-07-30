@@ -1,5 +1,6 @@
-package com.bbstone.client.core;
+package com.bbstone.client.core.base;
 
+import com.bbstone.client.core.ClientContextHolder;
 import com.bbstone.client.core.handler.MessageHandler;
 import com.bbstone.client.core.model.CmdEvent;
 import com.bbstone.comm.model.CmdResult;
@@ -18,6 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MessageDispatcher {
 
+	/**
+	 * all commands request raise by client, and the response message handle here
+	 * 
+	 * @param ctx
+	 * @param cmdRspEvent
+	 * @param connInfo
+	 */
 	public void dispatch(ChannelHandlerContext ctx, CmdRspEvent cmdRspEvent, ConnInfo connInfo) {
 		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(connInfo.connId())
 				.getHandler(cmdRspEvent.getCmd());
@@ -33,6 +41,26 @@ public class MessageDispatcher {
 			log.debug("try to wakeup waiting requests ...");
 			cmdEvent.getMsgFuture().setResult(cmdResult);
 		}
+	}
+
+	/**
+	 * all command request raise by server, will handler here(with no connId in
+	 * cmdRspEvent)
+	 * 
+	 * @param ctx
+	 * @param cmdRspEvent
+	 */
+	public void dispatchServerCmd(ChannelHandlerContext ctx, CmdRspEvent cmdRspEvent, ConnInfo connInfo) {
+		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(connInfo.connId())
+				.getHandler(cmdRspEvent.getCmd());
+		if (handler == null) {
+			log.error("not found handler for server command: {}", cmdRspEvent.getCmd());
+			return;
+		}
+
+		// command handle by specified handler
+		handler.handle(ctx, cmdRspEvent, connInfo);
+
 	}
 
 }

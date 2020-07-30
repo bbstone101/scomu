@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.bbstone.comm.model.ServerAuthInfo;
 import com.bbstone.comm.util.CmdUtil;
 import com.bbstone.comm.util.TokenUtil;
-import com.bbstone.server.core.ServerConfig;
 import com.bbstone.server.core.ServerContext;
+import com.bbstone.server.core.base.ServerConfig;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,7 +63,7 @@ public class ServerUtil {
 				return ServerConfig.demoPassword;
 			} else {
 				log.error("cannot found demo password for user: {}.", username);
-				throw new RuntimeException("demo username/password error.");
+//				throw new RuntimeException("demo username/password error.");
 			}
 		} 
 		if ("redis".equals(ServerConfig.authDB)) {

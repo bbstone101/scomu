@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.bbstone.client.core.ClientContextHolder;
-import com.bbstone.client.core.model.ConnStatus;
 import com.bbstone.comm.dto.rsp.AuthAnswerRsp;
+import com.bbstone.comm.enums.RetCode;
 import com.bbstone.comm.model.ClientAuthInfo;
 import com.bbstone.comm.model.CmdRspEvent;
 import com.bbstone.comm.model.ConnInfo;
@@ -35,7 +35,7 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 		if (retCode == 0 && StringUtils.isNotBlank(rspData)) {
 			AuthAnswerRsp rsp = JSON.parseObject(rspData, AuthAnswerRsp.class);
 			
-			// TODO check the cliRandAnswer to make sure the server is the right one(not the fake server)
+			// Tcheck the cliRandAnswer to make sure the server is the right one(not the fake server)
 			String cliRandAnswer = rsp.getCliRandAnswer();
 			if ( checkCliRandAnswer(connInfo, cliRandAnswer)) {
 				ClientContextHolder.getContext(connInfo.connId()).getClientAuthInfo().setCliRandAnswer(cliRandAnswer);
@@ -53,11 +53,16 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 				ClientContextHolder.getClientProcessor(connInfo.connId()).processAuthSuccess(ctx, cmdRspEvent.getConnId());
 			} else {
 				log.error("fake server connected, procedure abort!");
-//				clientContext.removeClientAuthInfo(connInfo.connId());
-				// notify connect wait for complete threads
-				ClientContextHolder.getClientConnector(connInfo.connId()).setStatus(ConnStatus.FAIL);
-				ClientContextHolder.getClientConnector(connInfo.connId()).updateConnStatus(connInfo.connId(), ConnStatus.FAIL);
+				ClientContextHolder.getClientProcessor(connInfo.connId()).processAuthRejectByClient(ctx, cmdRspEvent.getConnId());
+
 			}
+		} 
+		// auth fail
+		else if (RetCode.FAIL.code() == retCode) {
+			log.error("auth check not passed.");
+			ClientContextHolder.getClientProcessor(connInfo.connId()).processAuthRejectByServer(ctx, cmdRspEvent.getConnId());
+			
+			
 		}
 		
 	}

@@ -68,7 +68,7 @@ public class HeartBeatExecutor {
 //				
 //			}
 //		});
-		log.debug("send {} command, cmdId: {}", CC.HEART_BEAT, cmdId);
+		log.info("send {} command, cmdId: {}", CC.HEART_BEAT, cmdId);
 	}
 	
 	public void enableHeartBeat() {

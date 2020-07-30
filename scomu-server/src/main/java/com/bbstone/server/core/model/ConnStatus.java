@@ -1,4 +1,4 @@
-package com.bbstone.server.core;
+package com.bbstone.server.core.model;
 
 public enum ConnStatus {
 	

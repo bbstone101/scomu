@@ -1,9 +1,11 @@
-package com.bbstone.server.core;
+package com.bbstone.server.core.base;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.bbstone.comm.model.CmdReqEvent;
 import com.bbstone.comm.model.ServerAuthInfo;
+import com.bbstone.server.core.MessageHandler;
+import com.bbstone.server.core.ServerContext;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;

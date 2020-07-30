@@ -1,8 +1,9 @@
-package com.bbstone.client.core;
+package com.bbstone.client.core.base;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import com.bbstone.client.core.ClientContextHolder;
 import com.bbstone.client.core.model.ConnStatus;
 import com.bbstone.comm.model.ConnInfo;
 import com.bbstone.comm.proto.CmdMsg;
@@ -32,18 +33,18 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class Connection {
+public class Client {
 
 	private Bootstrap bootstrap = new Bootstrap();
 	private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-	private volatile boolean closed = false;
+	private volatile boolean noRetry = false;
 	private volatile boolean retryScheduled = false;
 	private volatile long lastRetryTime = 0L;
 
 	private ConnInfo connInfo;
 
-	public Connection(ConnInfo connInfo) {
+	public Client(ConnInfo connInfo) {
 		this.connInfo = connInfo;
 		ClientContextHolder.newContext(connInfo.connId());
 		ClientContextHolder.getClientSession(connInfo.connId()).saveConnection(this);
@@ -63,10 +64,10 @@ public class Connection {
 				pipeline.addFirst(new ChannelInboundHandlerAdapter() {
 					public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 						log.info("channel inactive(catched by first handler)........");
-						if (closed) {
-							log.info("user close connection.");
-							
-							ClientContextHolder.getClientProcessor(connInfo.connId()).processInactiveByClose(ctx, connInfo);
+						if (noRetry) {
+							log.info("user force close connection.");
+							ClientContextHolder.getClientProcessor(connInfo.connId()).processInactiveByClose(ctx,
+									connInfo);
 						} else {
 							super.channelInactive(ctx);
 							ClientContextHolder.getClientProcessor(connInfo.connId()).processInactive(ctx, connInfo);
@@ -85,10 +86,10 @@ public class Connection {
 				// Google Protocol Buffers编码器
 				pipeline.addLast(new ProtobufEncoder());
 //				pipeline.addLast(new ProtoClientHandler());
-				pipeline.addLast(new ConnectionChannelHandler(connInfo));
+				pipeline.addLast(new ClientChannelHandler(connInfo));
 			}
 		});
-		
+
 		doConnect();
 	}
 
@@ -108,17 +109,17 @@ public class Connection {
 			public void operationComplete(ChannelFuture f) throws Exception {
 				if (f.isSuccess()) {
 					SocketChannel sc = (SocketChannel) f.channel();
-					// -------
+					// ------- save socket channel and update connection status
 					ClientContextHolder.getClientSession(connInfo.getConnId()).saveSocketChannel(sc);
 					ClientContextHolder.getClientSession(connInfo.getConnId()).setConnStatus(ConnStatus.CONNECTED);
-					log.info("client connected.");
-					// ------
+					log.info("client connection established.");
+					// ------ reset re-connect variables
 					retryScheduled = false;
 					lastRetryTime = 0l;
-					// ---
 					ClientContextHolder.getContext(connInfo.getConnId()).resetRetryTimes();
 					ClientContextHolder.getContext(connInfo.getConnId()).incConnTimes();
 				} else {
+					// connect fail, schedule next try
 					scheduleNextTry(f.channel(), connInfo.connId());
 				}
 			}
@@ -146,13 +147,21 @@ public class Connection {
 	 * shutdown event executors
 	 */
 	public void shutdown() {
-		closed = true;
-		// Shut down all event loops to terminate all threads.
-		workerGroup.shutdownGracefully();
-
-		// Wait until all threads are terminated.
-		workerGroup.terminationFuture().syncUninterruptibly();
+		noRetry = true;
+		log.info("client shutdown proceeding...");
+		// shut down executor
+		if (!workerGroup.isShutdown()) {
+			workerGroup.shutdownGracefully();
+		}
+		// terminate all tasks
+		if (!workerGroup.isTerminated()) {
+			// both can be close by client api and auth fail handler(AuthAnswerMessageHandler)
+			workerGroup.terminationFuture();
+			// auth fail cannot close client connection, but can close via client api
+//			workerGroup.terminationFuture().syncUninterruptibly();
+		}
 		log.info("event executor is shutdown.");
+
 		try {
 			// ensure that shutdown has actually completed and won't
 			// cause class loader error if JVM starts unloading classes
@@ -160,6 +169,11 @@ public class Connection {
 		} catch (InterruptedException ignore) {
 			// ignore
 		}
+		log.info("client shutdown success.");
+	}
+
+	public void setNoRetry(boolean noRetry) {
+		this.noRetry = noRetry;
 	}
 
 }

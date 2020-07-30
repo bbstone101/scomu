@@ -1,4 +1,4 @@
-package com.bbstone.client.core;
+package com.bbstone.client.core.base;
 
 import java.io.File;
 

@@ -1,6 +1,7 @@
 package com.bbstone.comm.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.bbstone.comm.CmdConst;
 
 import lombok.Data;
 
@@ -55,5 +56,17 @@ public class CmdReqEvent {
 		return new CmdReqEvent(id, cmd, data, createTs, reqTs, connId);
 	}
 	
+	/**
+	 * the request raise by server
+	 * 
+	 * only for build message request raise by server (still encapsulated data in CmdRsp),
+	 * 
+	 * @param id
+	 * @param cmd
+	 * @return
+	 */
+	public static CmdReqEvent from(String id, String cmd) {
+		return new CmdReqEvent(id, cmd, null, System.currentTimeMillis(), System.currentTimeMillis(), CmdConst.EMPTY_CMD_ID);
+	}
 
 }

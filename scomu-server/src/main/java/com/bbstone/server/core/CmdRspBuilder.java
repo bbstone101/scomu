@@ -13,6 +13,11 @@ import com.bbstone.comm.util.CmdUtil;
 
 public class CmdRspBuilder {
 	
+	/**
+	 * build CmdRsp with no body data
+	 * @param cmdReqEvent
+	 * @return
+	 */
 	public static CmdRsp buildRspWithNoBody(CmdReqEvent cmdReqEvent) {
 		CmdRsp cmdRsp = CmdMsg.CmdRsp.newBuilder()
 				.setId(cmdReqEvent.getId())
@@ -28,6 +33,12 @@ public class CmdRspBuilder {
 		return cmdRsp;
 	}
 	
+	/**
+	 * build CmdRsp with body data
+	 * @param cmdReqEvent
+	 * @param data
+	 * @return
+	 */
 	public static CmdRsp buildRsp(CmdReqEvent cmdReqEvent, String data) {
 		CmdRsp cmdRsp = CmdMsg.CmdRsp.newBuilder()
 				.setId(cmdReqEvent.getId())
@@ -43,6 +54,11 @@ public class CmdRspBuilder {
 		return cmdRsp;
 	}
 	
+	/**
+	 * build heart beat CmdRsp
+	 * @param cmdReqEvent
+	 * @return
+	 */
 	public static CmdRsp buildHeartBeatRsp(CmdReqEvent cmdReqEvent) {
 		CmdRsp cmdRsp = CmdMsg.CmdRsp.newBuilder()
 				.setId(cmdReqEvent.getId())
@@ -58,6 +74,12 @@ public class CmdRspBuilder {
 		return cmdRsp;
 	}
 	
+	/**
+	 * build auth start CmdRsp
+	 * @param cmdReqEvent
+	 * @param srvRand
+	 * @return
+	 */
 	public static CmdRsp buildAuthStartRsp(CmdReqEvent cmdReqEvent, String srvRand) {
 		AuthStartRsp reqData = CmdRspFactory.newAuthStartRsp(srvRand);
 		String data = JSON.toJSONString(reqData);
@@ -76,6 +98,14 @@ public class CmdRspBuilder {
 		return cmdRsp;
 	}
 	
+	/**
+	 * build auth answer CmdRsp
+	 * @param cmdReqEvent
+	 * @param cliRand
+	 * @param accessToken
+	 * @param password
+	 * @return
+	 */
 	public static CmdRsp buildAuthAnswerRsp(CmdReqEvent cmdReqEvent, String cliRand, String accessToken, String password) {
 		// TODO password should not store plain text in connInfo instance for security protection
 //		String password = ServerUtil.findPassword(username);
@@ -99,6 +129,11 @@ public class CmdRspBuilder {
 		return cmdRsp;
 	}
 	
+	/**
+	 * build fail auth answer CmdRsp
+	 * @param cmdReqEvent
+	 * @return
+	 */
 	public static CmdRsp buildFailAuthAnswerRsp(CmdReqEvent cmdReqEvent) {
 		
 		AuthAnswerRsp rspData = CmdRspFactory.newAuthAnswerRsp(null, null);

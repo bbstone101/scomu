@@ -8,6 +8,7 @@ import com.bbstone.client.core.handler.AuthAnswerMessageHandler;
 import com.bbstone.client.core.handler.AuthStartMessageHandler;
 import com.bbstone.client.core.handler.HeartBeatMessageHandler;
 import com.bbstone.client.core.handler.MessageHandler;
+import com.bbstone.client.core.handler.StopReconnMessageHandler;
 import com.bbstone.comm.enums.CC;
 
 
@@ -55,6 +56,8 @@ public class MessageHandlerRegister {
 		cmdHandlers.put(CC.AUTH_ANSWER.name(), new AuthAnswerMessageHandler());
 		
 		cmdHandlers.put(CC.HEART_BEAT.name(), new HeartBeatMessageHandler());
+		
+		cmdHandlers.put(CC.SRV_CMD_STOP_RECONN.name(), new StopReconnMessageHandler());
 		
 		// use default message handle logic
 //		cmdHandlers.put(CC.GET_ORDER.name(), new DefaultMessageHandler());

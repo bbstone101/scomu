@@ -2,8 +2,10 @@ package com.bbstone.client.util;
 
 import com.bbstone.client.core.ClientSession;
 import com.bbstone.comm.model.CmdReqEvent;
+import com.bbstone.comm.proto.CmdMsg.CmdReq;
 import com.bbstone.comm.util.TokenUtil;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -49,5 +51,12 @@ public class ClientUtil {
 		return (System.currentTimeMillis() - cmdReqEvent.getCreateTs() >= ClientSession.REQ_CONSUME_IDLE_TIME_MAX);
 	}
 	
+	public static void sendReq(ChannelHandlerContext ctx, CmdReq cmdReq) {
+		if (ctx == null || cmdReq == null) {
+			log.error("command request not sent.");
+			return;
+		}
+		ctx.writeAndFlush(cmdReq);
+	}
 
 }

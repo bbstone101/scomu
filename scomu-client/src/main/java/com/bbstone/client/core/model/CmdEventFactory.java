@@ -1,6 +1,4 @@
-package com.bbstone.client.core;
-
-import com.bbstone.client.core.model.CmdEvent;
+package com.bbstone.client.core.model;
 
 public class CmdEventFactory {
 

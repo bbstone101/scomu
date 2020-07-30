@@ -21,6 +21,7 @@ public class CmdConst {
 	public static final String CRYPT_METHOD_NONE = "NONE";
 	public static final String CRYPT_METHOD_AES = "AES";
 	
+	public static final String EMPTY_CMD_ID = "EMPTY_CMD_ID";
 	
 	
 	

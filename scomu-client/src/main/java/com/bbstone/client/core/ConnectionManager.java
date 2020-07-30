@@ -3,6 +3,7 @@ package com.bbstone.client.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bbstone.client.core.base.Connector;
 import com.bbstone.client.core.model.ConnStatus;
 import com.bbstone.comm.model.ConnInfo;
 
@@ -17,7 +18,8 @@ public class ConnectionManager {
 
 	public static String open(ConnInfo connInfo) {
 		ClientContextHolder.newContext(connInfo.connId());
-		ClientContextHolder.getClientConnector(connInfo.connId()).connect(connInfo);
+		Connector connector = ClientContextHolder.getClientConnector(connInfo.connId());
+		connector.connect(connInfo);
 		return connInfo.connId();
 	}
 
@@ -34,8 +36,9 @@ public class ConnectionManager {
 	}
 
 	public static void close(String connId) {
-		ClientContextHolder.getClientConnector(connId).disconnect(connId);
-		ClientContextHolder.getContext(connId).destroy();
+		ClientContextHolder.getClientConnector(connId).disconnect();
+		// channel inactive will deploy and clear context/session
+//		ClientContextHolder.getContext(connId).destroy();
 	}
 
 	public static void reopen(ConnInfo connInfo) {

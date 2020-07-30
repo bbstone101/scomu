@@ -12,5 +12,9 @@ public enum ConnStatus {
 	
 	FAIL, 
 	
+	AUTH_FAIL, 
+	
+	FAKE_SERVER, 
+	
 	CONNECTING;
 }

@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.bbstone.comm.model.ConnInfo;
+import com.bbstone.server.core.base.Server;
+import com.bbstone.server.core.base.ServerConfig;
+import com.bbstone.server.core.model.ConnStatus;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -108,7 +111,6 @@ public class ServerSession {
 			
 		});
 	}
-	
 	
 
 }

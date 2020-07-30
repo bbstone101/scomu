@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
+import com.bbstone.client.core.base.Client;
 import com.bbstone.client.core.model.CmdEvent;
 import com.bbstone.client.core.model.ConnStatus;
 import com.bbstone.client.core.model.Scheduler;
@@ -68,7 +69,7 @@ public class ClientSession {
 	
 	private ConnInfo connInfo;
 	private ConnStatus connStatus;
-	private Connection connection;
+	private Client connection;
 	private SocketChannel socketChannel;
 	private ChannelHandlerContext channelHandlerContext;
 
@@ -125,11 +126,11 @@ public class ClientSession {
 		return connInfo;
 	}
 
-	public void saveConnection(Connection client) {
+	public void saveConnection(Client client) {
 		this.connection = client;
 	}
 
-	public Connection getConnection() {
+	public Client getConnection() {
 		return this.connection;
 	}
 
