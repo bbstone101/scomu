@@ -16,9 +16,9 @@ import com.bbstone.comm.proto.CmdMsg.CmdReq;
 import com.bbstone.comm.util.CmdUtil;
 import com.bbstone.comm.util.TokenUtil;
 
-public class CmdReqBuilder {
+public class MessageBuilder {
 	
-	public CmdReq buildAuthStartReq(ConnInfo connInfo) {
+	public static CmdReq buildAuthStartReq(ConnInfo connInfo) {
 		AuthStartReq authStartReq = CmdReqFactory.newAuthStartReq(connInfo.getUsername(), 
 				CmdConst.WEB_API_VER, CmdConst.AUTH_TYPE_NORMAL, CmdConst.CRYPT_METHOD_NONE);
 		ClientContextHolder.getContext(connInfo.connId()).getClientAuthInfo().setAuthStartReq(authStartReq);
@@ -47,7 +47,7 @@ public class CmdReqBuilder {
 	 * @param clirand
 	 * @return
 	 */
-	public CmdReq buildAuthAnswerReq(ConnInfo connInfo, String srvRand, String cliRand) {
+	public static CmdReq buildAuthAnswerReq(ConnInfo connInfo, String srvRand, String cliRand) {
 		// TODO password should not store plain text in connInfo instance for security protection
 		String srvRandAnswer = CmdUtil.calcSrvRandAnswer(srvRand, connInfo.getPassword());
 		
@@ -65,7 +65,7 @@ public class CmdReqBuilder {
 		return cmdReq;
 	}
 	
-	public CmdReq buildCmdReq(String connId, String cmd, String data) throws AuthException {
+	public static CmdReq buildCmdReq(String connId, String cmd, String data) throws AuthException {
 		String accessToken = getAccessToken(connId);
 		if (StringUtils.isBlank(accessToken)) {
 			throw new AuthException("not found accessToken.");
@@ -82,7 +82,7 @@ public class CmdReqBuilder {
 		return cmdReq;
 	}
 	
-	public CmdReq buildCmdReq(CmdReqEvent cmdReqEvent) throws AuthException {
+	public static CmdReq buildCmdReq(CmdReqEvent cmdReqEvent) throws AuthException {
 		String accessToken = getAccessToken(cmdReqEvent.getConnId());
 		if (StringUtils.isBlank(accessToken)) {
 			throw new AuthException("not found accessToken.");
@@ -99,7 +99,7 @@ public class CmdReqBuilder {
 		return cmdReq;
 	}
 	
-	private String getAccessToken(String connId) {
+	private static String getAccessToken(String connId) {
 		String accessToken = ClientContextHolder.getContext(connId).getClientAuthInfo().getAccessToken();
 //		if (StringUtils.isBlank(accessToken)) {
 //			throw new RuntimeException("not found access token, please login first.");

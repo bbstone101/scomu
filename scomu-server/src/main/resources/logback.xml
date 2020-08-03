@@ -2,11 +2,11 @@
 <configuration>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{MM/dd/yyyy HH:mm:ss} %-5level [%thread%X{sourceThread}]%logger{24}:%line - %msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread%X{sourceThread}]%logger{24}:%line - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<root level="DEBUG">
-<!-- 	<root level="INFO"> -->
+<!-- 	<root level="DEBUG"> -->
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

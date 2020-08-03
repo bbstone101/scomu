@@ -5,6 +5,9 @@ public enum RetCode {
 	SUCCESS(0, "success"),
 	FAIL(1, "fail"),
 	THREAD_INTERRUPTED(2, "Thread has been interrupted."),
+	REQ_TIMEOUT(3, "Request timeout."),
+	
+	
 	
 	OTHER(9999, "other");
 

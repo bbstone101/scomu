@@ -1,4 +1,4 @@
-package com.bbstone.client.core.base;
+package com.bbstone.client.core;
 
 import java.io.File;
 
@@ -28,6 +28,9 @@ public class ClientConfig {
 	public static int retryMax = config().getInt("scomu.conn.retry.max", 300);
 	
 	public static int heartBeatEnabled = config().getInt("scomu.heartbeat.enabled", 0);
+	
+	// request timeout, unit(millisecond)
+	public static int reqTimeout = config().getInt("scomu.request.timeout", 3000);
 	
 	
 	

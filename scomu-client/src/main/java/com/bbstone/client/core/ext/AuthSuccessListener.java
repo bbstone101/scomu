@@ -1,4 +1,4 @@
-package com.bbstone.client.core;
+package com.bbstone.client.core.ext;
 
 import io.netty.channel.ChannelHandlerContext;
 

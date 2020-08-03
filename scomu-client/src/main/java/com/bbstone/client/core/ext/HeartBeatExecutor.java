@@ -1,9 +1,10 @@
-package com.bbstone.client.core;
+package com.bbstone.client.core.ext;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.bbstone.client.core.ClientUtil;
 import com.bbstone.comm.enums.CC;
 import com.bbstone.comm.model.CmdReqEvent;
 import com.bbstone.comm.util.CmdUtil;
@@ -55,7 +56,7 @@ public class HeartBeatExecutor {
 				System.currentTimeMillis(), 
 				System.currentTimeMillis(), 
 				connId);
-		ClientContextHolder.getContext(connId).sendReqOnly(cmdReqEvent);
+		ClientUtil.sendReqOnly(cmdReqEvent);
 //		ClientContextHolder.getContext(connId).sendReq(cmdReqEvent);
 //		CmdResult cmdReult = ClientUtil.sendReq(cmdReqEvent);
 //		System.out.println("<<<<<<<<<<<<" + cmdReult.getCode() + ", " + cmdReult.getMsg() + ">>>>>>>>>>>>>>>>>");

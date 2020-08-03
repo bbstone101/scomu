@@ -5,7 +5,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.bbstone.client.core.ConnectionManager;
+import com.bbstone.client.core.ClientConnectionManager;
 import com.bbstone.comm.model.ConnInfo;
 import com.bbstone.comm.util.ConnUtil;
 

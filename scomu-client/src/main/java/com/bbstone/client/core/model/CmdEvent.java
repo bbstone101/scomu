@@ -1,6 +1,6 @@
 package com.bbstone.client.core.model;
 
-import com.bbstone.comm.MessageFuture;
+import com.bbstone.client.core.MessageFuture;
 import com.bbstone.comm.model.CmdReqEvent;
 import com.bbstone.comm.model.CmdRspEvent;
 

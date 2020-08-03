@@ -1,11 +1,8 @@
-package com.bbstone.client.core.base;
+package com.bbstone.client.core;
 
-import com.bbstone.client.core.ClientContextHolder;
-import com.bbstone.client.core.handler.MessageHandler;
 import com.bbstone.client.core.model.CmdEvent;
 import com.bbstone.comm.model.CmdResult;
 import com.bbstone.comm.model.CmdRspEvent;
-import com.bbstone.comm.model.ConnInfo;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -26,19 +23,28 @@ public class MessageDispatcher {
 	 * @param cmdRspEvent
 	 * @param connInfo
 	 */
-	public void dispatch(ChannelHandlerContext ctx, CmdRspEvent cmdRspEvent, ConnInfo connInfo) {
-		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(connInfo.connId())
+	public void dispatch(ChannelHandlerContext channelHandlerContext, ClientContext clientContext,
+			CmdRspEvent cmdRspEvent) {
+		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(clientContext.getConnId())
 				.getHandler(cmdRspEvent.getCmd());
 		if (handler != null) {
 			// command handle by specified handler
-			handler.handle(ctx, cmdRspEvent, connInfo);
+			handler.handle(channelHandlerContext, clientContext, cmdRspEvent);
+			// commands wich specified handler need to remove running cmd in pool in
+			// concrete handlers
+
 		} else { // command with no handler register, processing by following logic
-			CmdEvent cmdEvent = ClientContextHolder.getClientSession(cmdRspEvent.getConnId())
-					.getRunningCmd(cmdRspEvent.getId());
-			ClientContextHolder.getClientSession(cmdRspEvent.getConnId()).removeRunningCmd(cmdRspEvent.getId());
+//			CmdEvent cmdEvent = ClientContextHolder.getContext(cmdRspEvent.getConnId())
+//					.getRunningCmd(cmdRspEvent.getId());
+//			ClientContextHolder.getContext(cmdRspEvent.getConnId()).removeRunningCmd(cmdRspEvent.getId());
+
 			CmdResult cmdResult = CmdResult.from(cmdRspEvent.getRetCode(), cmdRspEvent.getRetData(),
 					cmdRspEvent.getRetData());
+
 			log.debug("try to wakeup waiting requests ...");
+			CmdEvent cmdEvent = ClientUtil.getAndRemoveRunningCmd(cmdRspEvent.getConnId(), cmdRspEvent.getId());
+			log.info("removed cmd([cmd={}, cmdId={}, connId={}]) from running pool.", cmdRspEvent.getCmd(),
+					cmdRspEvent.getId(), cmdRspEvent.getConnId());
 			cmdEvent.getMsgFuture().setResult(cmdResult);
 		}
 	}
@@ -50,8 +56,9 @@ public class MessageDispatcher {
 	 * @param ctx
 	 * @param cmdRspEvent
 	 */
-	public void dispatchServerCmd(ChannelHandlerContext ctx, CmdRspEvent cmdRspEvent, ConnInfo connInfo) {
-		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(connInfo.connId())
+	public void dispatchServerCmd(ChannelHandlerContext channelHandlerContext, ClientContext clientContext,
+			CmdRspEvent cmdRspEvent) {
+		MessageHandler handler = ClientContextHolder.getMessageHandlerRegister(clientContext.getConnId())
 				.getHandler(cmdRspEvent.getCmd());
 		if (handler == null) {
 			log.error("not found handler for server command: {}", cmdRspEvent.getCmd());
@@ -59,7 +66,7 @@ public class MessageDispatcher {
 		}
 
 		// command handle by specified handler
-		handler.handle(ctx, cmdRspEvent, connInfo);
+		handler.handle(channelHandlerContext, clientContext, cmdRspEvent);
 
 	}
 

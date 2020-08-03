@@ -1,21 +1,21 @@
 package com.bbstone.client.core;
 
-import com.bbstone.client.core.base.ClientConfig;
-import com.bbstone.client.core.base.Connector;
-import com.bbstone.client.core.base.MessageDispatcher;
-import com.bbstone.client.core.exception.AuthException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.bbstone.client.core.ext.AuthSuccessListener;
 import com.bbstone.client.core.model.CmdEvent;
-import com.bbstone.client.core.model.CmdEventFactory;
+import com.bbstone.client.core.model.ConnStatus;
+import com.bbstone.client.core.model.Scheduler;
 import com.bbstone.client.core.model.Statis;
-import com.bbstone.client.util.ClientUtil;
-import com.bbstone.comm.enums.RetCode;
 import com.bbstone.comm.model.ClientAuthInfo;
-import com.bbstone.comm.model.CmdReqEvent;
-import com.bbstone.comm.model.CmdResult;
-import com.bbstone.comm.proto.CmdMsg.CmdReq;
+import com.bbstone.comm.model.ConnInfo;
 
 import io.netty.channel.ChannelHandlerContext;
-import lombok.extern.slf4j.Slf4j;
+import io.netty.channel.socket.SocketChannel;
 
 /**
  * 
@@ -27,28 +27,37 @@ import lombok.extern.slf4j.Slf4j;
  * @author bbstone
  *
  */
-@Slf4j
 public class ClientContext {
 
-	private static boolean TRUE = true;
-	private static boolean FALSE = false;
-
 	private String connId;
-	private Connector clientConnector;
-	private ClientProcessor clientProcessor;
-	private ClientSession clientSession;
-	private CmdReqBuilder cmdReqBuilder;
-	private MessageDispatcher messageDispatcher;
-	private MessageHandlerRegister messageHandlerRegister;
-	private HeartBeatExecutor heartBeatExecutor;
-
+	private ConnInfo connInfo;
+	private ConnStatus connStatus;
+	
 	private Statis statis;
 	private ClientAuthInfo clientAuthInfo;
 	
-//	private List<AuthSuccessListener> authSuccessListeners = new ArrayList<>();
+	/** every running cmd will store here, cmd will be deleted in this case: 1) cmd rsp;2)timeout;3)crash(re-initial) */
+	/** Running Cmd Pool, <cmdId, CmdEvent> */
+	private ConcurrentMap<String, CmdEvent> runningReqCmdPool = new ConcurrentHashMap<>(); 
+	
+	private List<AuthSuccessListener> authSuccessListeners = new ArrayList<>();
+	private List<Scheduler> authSuccessSchedulers = new ArrayList<>();
+	
+	private SocketChannel socketChannel;
+	private ChannelHandlerContext channelHandlerContext;
 
-	ClientContext(String connId) {
-		this.connId = connId;
+	private boolean destoryed = false;
+	
+	private volatile boolean retry;
+	private AtomicInteger timeoutReqs = new AtomicInteger();
+	
+	
+	
+	
+	
+	ClientContext(ConnInfo connInfo) {
+		this.connInfo = connInfo;
+		this.connId = connInfo.connId();
 		initial(connId);
 	}
 
@@ -59,16 +68,11 @@ public class ClientContext {
 	 * @param connId
 	 */
 	void initial(String connId) {
-		clientConnector = new Connector();
-		clientProcessor = new ClientProcessor();
-		clientSession = new ClientSession();
-		cmdReqBuilder = new CmdReqBuilder();
-		messageDispatcher = new MessageDispatcher();
-		messageHandlerRegister = new MessageHandlerRegister();
-		heartBeatExecutor = new HeartBeatExecutor();
-
+		retry = true;
 		statis = new Statis();
 		clientAuthInfo = new ClientAuthInfo();
+		
+		destoryed = false;
 	}
 
 	/**
@@ -77,49 +81,91 @@ public class ClientContext {
 	 * @param
 	 */
 	void destroy() {
-		clientProcessor = null;
-		clientSession = null;
-		cmdReqBuilder = null;
-		messageDispatcher = null;
-		messageHandlerRegister = null;
-		heartBeatExecutor = null;
-
+		retry = false;
 		statis = null;
 		clientAuthInfo = null;
+		
+		connInfo = null;
+		connStatus = null;
+//		connection  = null;
+		socketChannel = null;
+		channelHandlerContext = null;
+		
+		authSuccessListeners.clear();
+		authSuccessSchedulers.clear();
+		runningReqCmdPool.clear();
+		
+		destoryed = true;
 	}
 
 	// --------------
+	
+	
+	public boolean isDestroyed() {
+		return destoryed;
+	}
+	
+	public boolean isRetry() {
+		return retry;
+	}
 
-	public String connId() {
+	void setRetry(boolean retry) {
+		this.retry = retry;
+	}
+
+	String connId() {
 		return connId;
 	}
 
-	public Connector getClientConnector() {
-		return clientConnector;
+	public int incrementAndGetTimeoutReqs() {
+		return timeoutReqs.incrementAndGet();
+	}
+	
+	public int getTimeoutReqSize() {
+		return timeoutReqs.get();
+	}
+	
+	ChannelHandlerContext getChannelHandlerContext() {
+		return channelHandlerContext;
 	}
 
-	public ClientProcessor getClientProcessor() {
-		return this.clientProcessor;
+	void setChannelHandlerContext(ChannelHandlerContext channelHandlerContext) {
+		this.channelHandlerContext = channelHandlerContext;
 	}
 
-	public ClientSession getClientSession() {
-		return clientSession;
+	ConcurrentMap<String, CmdEvent> getRunningReqCmdPool() {
+		return runningReqCmdPool;
 	}
 
-	public CmdReqBuilder getCmdReqBuilder() {
-		return cmdReqBuilder;
+	void setRunningReqCmdPool(ConcurrentMap<String, CmdEvent> runningReqCmdPool) {
+		this.runningReqCmdPool = runningReqCmdPool;
 	}
 
-	public MessageDispatcher getMessageDispatcher() {
-		return messageDispatcher;
+	List<Scheduler> getAuthSuccessSchedulers() {
+		return authSuccessSchedulers;
 	}
 
-	public MessageHandlerRegister getMessageHandlerRegister() {
-		return messageHandlerRegister;
+	void setAuthSuccessSchedulers(List<Scheduler> authSuccessSchedulers) {
+		this.authSuccessSchedulers = authSuccessSchedulers;
 	}
 
-	public HeartBeatExecutor getHeartBeatExecutor() {
-		return heartBeatExecutor;
+	void setConnId(String connId) {
+		this.connId = connId;
+	}
+
+	void setConnInfo(ConnInfo connInfo) {
+		this.connInfo = connInfo;
+	}
+	void setSocketChannel(SocketChannel socketChannel) {
+		this.socketChannel = socketChannel;
+	}
+
+	void setStatis(Statis statis) {
+		this.statis = statis;
+	}
+
+	void setClientAuthInfo(ClientAuthInfo clientAuthInfo) {
+		this.clientAuthInfo = clientAuthInfo;
 	}
 
 	// ----------------------- statis
@@ -127,29 +173,29 @@ public class ClientContext {
 		return statis;
 	}
 
-	public int connTimes() {
+	int connTimes() {
 		return statis.getConnectTimes();
 	}
 
-	public void incConnTimes() {
+	void incConnTimes() {
 		statis.setConnectTimes(connTimes() + 1);
 	}
 
 	/** force start from 1 */
-	public int retryTimes() {
+	int retryTimes() {
 		int retryTimes = getStatis().getRetryTimes();
 		return (retryTimes == 0) ? 1 : retryTimes;
 	}
 
-	public void incRetryTimes() {
+	void incRetryTimes() {
 		statis.setRetryTimes(retryTimes() + 1);
 	}
 
-	public void resetRetryTimes() {
+	void resetRetryTimes() {
 		statis.setRetryTimes(0);
 	}
 
-	public boolean isExceedRetryMax() {
+	boolean isExceedRetryMax() {
 		return ClientConfig.retryIntvl * retryTimes() > ClientConfig.retryMax;
 
 	}
@@ -159,96 +205,99 @@ public class ClientContext {
 		return statis.isCmdAcceptable();
 	}
 
-	public void rejectCmd() {
-		statis.setCmdAcceptable(FALSE);
+	void rejectCmd() {
+		statis.setCmdAcceptable(false);
 	}
 
-	public void acceptCmd() {
-		statis.setCmdAcceptable(TRUE);
+	void acceptCmd() {
+		statis.setCmdAcceptable(true);
 	}
 
-	public void saveClientAuthInfo(ClientAuthInfo clientAuthInfo) {
+	void saveClientAuthInfo(ClientAuthInfo clientAuthInfo) {
 		this.clientAuthInfo = clientAuthInfo;
 	}
 
-	public ClientAuthInfo getClientAuthInfo() {
+	ClientAuthInfo getClientAuthInfo() {
 		return clientAuthInfo;
 	}
-	
-	
-//	public List<AuthSuccessListener> getAuthSuccessListeners() {
-//		return this.authSuccessListeners;
-//	}
-//	
-//	public void addAuthSuccessListener(AuthSuccessListener listener) {
-//		this.authSuccessListeners.add(listener);
-//	}
-	
-	// ------------------------------ req process
 
-	/**
-	 * used ChannelHandlerContext to write, msg flow from next handler(write: next
-	 * -> head, read: next -> tail), but if used SocketChannel, will start from
-	 * tail(write: tail -> head, read: head -> tail),
-	 * 
-	 * @param cmdReqEvent
-	 * @throws AuthException 
-	 */
-	public CmdResult sendReq(CmdReqEvent cmdReqEvent) {
+	ConnStatus getConnStatus() {
+		return connStatus;
+	}
 
-//		SocketChannel sc = ClientSession.getSocketChannel(connId);
-		ChannelHandlerContext ctx = clientSession.getChannelHandlerCtx();
+	void setConnStatus(ConnStatus connStatus) {
+		this.connStatus = connStatus;
+	}
 
-		CmdReq cmdReq = null;
-		try {
-			cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
-//			sc.writeAndFlush(cmdReq);
-//			ctx.writeAndFlush(cmdReq);
-			ClientUtil.sendReq(ctx, cmdReq);
-		} catch (AuthException e1) {
-			log.error("send command request error.", e1);
-			return CmdResult.from(RetCode.FAIL.code(), RetCode.FAIL.descp());
-		}
-
-		CmdEvent cmdEvent = CmdEventFactory.newInstance();
-		cmdEvent.setCmdId(cmdReqEvent.getId());
-		cmdEvent.setCmdReqEvent(cmdReqEvent);
-		cmdEvent.setMsgFuture(MessageFutureFactory.newInstance());
-		clientSession.addRunningCmd(cmdEvent);
-//		return cmdEvent.getMsgFuture();
-
-		CmdResult cmdResult = null;
-		try {
-			cmdResult = cmdEvent.getMsgFuture().getResult();
-			log.info("recv get order result.......");
-		} catch (InterruptedException e) {
-			return CmdResult.from(RetCode.THREAD_INTERRUPTED.code(), RetCode.THREAD_INTERRUPTED.descp());
-		}
-		return cmdResult;
+	// ------- running cmd 
+	void addRunningCmd(CmdEvent cmdEvent) {
+		runningReqCmdPool.put(cmdEvent.getCmdId(), cmdEvent);
 	}
 	
-	/**
-	 * only send request to server, and not wait for response (HeartBeat),
-	 * 
-	 * and this request command will not store to running command pool.
-	 * 
-	 * NOTICE: the command must be registered to the MessageHandlerRegister, or will cause exception
-	 * 
-	 * @param cmdReqEvent
-	 * @return
-	 * @throws AuthException 
-	 */
-	public void sendReqOnly(CmdReqEvent cmdReqEvent) {
-		ChannelHandlerContext ctx = clientSession.getChannelHandlerCtx();
-		CmdReq cmdReq;
-		try {
-			cmdReq = cmdReqBuilder.buildCmdReq(cmdReqEvent);
-//			ctx.writeAndFlush(cmdReq);
-			ClientUtil.sendReq(ctx, cmdReq);
-		} catch (AuthException e) {
-			log.error("send command request error.", e);
-		}
-		
+	CmdEvent getRunningCmd(String cmdId) {
+		return runningReqCmdPool.get(cmdId);
 	}
+	
+	void removeRunningCmd(String cmdId) {
+		runningReqCmdPool.remove(cmdId);
+	}
+	
+	int runningCmdSize() {
+		return runningReqCmdPool.size();
+	}
+	
+
+	void saveConnInfo(ConnInfo connInfo) {
+		this.connInfo = connInfo;
+	}
+
+	public ConnInfo getConnInfo() {
+		return connInfo;
+	}
+
+	public String getConnId() {
+		return connId;
+	}
+
+//	void saveConnection(ClientConnection client) {
+//		this.connection = client;
+//	}
+//
+//	ClientConnection getConnection() {
+//		return this.connection;
+//	}
+
+	void saveSocketChannel(SocketChannel channel) {
+		this.socketChannel = channel;
+	}
+
+	SocketChannel getSocketChannel() {
+		return socketChannel;
+	}
+
+
+	List<AuthSuccessListener> getAuthSuccessListeners() {
+		return authSuccessListeners;
+	}
+
+	public void addAuthSuccessListener(AuthSuccessListener authSuccessListener) {
+		authSuccessListeners.add(authSuccessListener);
+	}
+
+	List<Scheduler> getAuthSucessSchedulers() {
+		return authSuccessSchedulers;
+	}
+
+	void addAuthSuccessScheduler(Scheduler scheduler) {
+		authSuccessSchedulers.add(scheduler);
+	}
+
+	void clearAllAuthSuccessScheduler() {
+		authSuccessSchedulers.clear();
+	}
+
+	
+	
+	
 
 }

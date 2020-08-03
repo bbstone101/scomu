@@ -4,10 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.bbstone.client.core.handler.AuthAnswerMessageHandler;
-import com.bbstone.client.core.handler.AuthStartMessageHandler;
 import com.bbstone.client.core.handler.HeartBeatMessageHandler;
-import com.bbstone.client.core.handler.MessageHandler;
 import com.bbstone.client.core.handler.StopReconnMessageHandler;
 import com.bbstone.comm.enums.CC;
 

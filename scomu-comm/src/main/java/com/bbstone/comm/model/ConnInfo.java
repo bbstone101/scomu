@@ -20,7 +20,7 @@ public class ConnInfo {
 	 *  */
 	private String password;
 	
-	public ConnInfo() {}
+//	private ConnInfo() {}
 
 	public ConnInfo(String host, int port, String username, String password) {
 		super();

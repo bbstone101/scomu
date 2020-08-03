@@ -1,7 +1,6 @@
-package com.bbstone.client.core.handler;
+package com.bbstone.client.core;
 
 import com.bbstone.comm.model.CmdRspEvent;
-import com.bbstone.comm.model.ConnInfo;
 
 import io.netty.channel.ChannelHandlerContext;
 
@@ -18,6 +17,6 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public interface MessageHandler {
 	
-	public void handle(ChannelHandlerContext ctx, CmdRspEvent cmdRspEvent, ConnInfo connInfo); 
+	public void handle(ChannelHandlerContext ctx, ClientContext clientContext, CmdRspEvent cmdRspEvent); 
 
 }
