@@ -100,9 +100,9 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 		}
 
 		// notify connect threads which waiting for complete
-		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.CONNECTED);
+		ClientContextHolder.getClientConnector(connId).setStatus(clientContext, ConnStatus.CONNECTED);
 		// update client session connection status
-		ClientContextHolder.getClientConnector(connId).updateConnStatus(clientContext, ConnStatus.CONNECTED);
+//		ClientContextHolder.getClientConnector(connId).updateConnStatus(clientContext, ConnStatus.CONNECTED);
 
 		log.debug("auth success, connection is ready for transmitting commands...");
 		// execute authSuccessListeners
@@ -129,8 +129,8 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 	 */
 	public void processAuthRejectByClient(ChannelHandlerContext ctx, String connId) {
 		// nodify auth req to release lock(wait)
-		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.FAKE_SERVER);
-		ClientContextHolder.getClientConnector(connId).updateConnStatus(ClientContextHolder.getContext(connId), ConnStatus.AUTH_FAIL);
+		ClientContextHolder.getClientConnector(connId).setStatus(ClientContextHolder.getContext(connId), ConnStatus.FAKE_SERVER);
+//		ClientContextHolder.getClientConnector(connId).updateConnStatus(ClientContextHolder.getContext(connId), ConnStatus.AUTH_FAIL);
 
 	}
 
@@ -142,8 +142,8 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 	public void processAuthRejectByServer(ChannelHandlerContext ctx, String connId) {
 //		clientContext.removeClientAuthInfo(clientContext.getConnId());
 		// notify connect wait for complete threads
-		ClientContextHolder.getClientConnector(connId).setStatus(ConnStatus.AUTH_FAIL);
-		ClientContextHolder.getClientConnector(connId).updateConnStatus(ClientContextHolder.getContext(connId), ConnStatus.AUTH_FAIL);
+		ClientContextHolder.getClientConnector(connId).setStatus(ClientContextHolder.getContext(connId), ConnStatus.AUTH_FAIL);
+//		ClientContextHolder.getClientConnector(connId).updateConnStatus(ClientContextHolder.getContext(connId), ConnStatus.AUTH_FAIL);
 		// close connection
 		ClientConnectionManager.close(connId);
 	}

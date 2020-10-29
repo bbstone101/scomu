@@ -43,7 +43,7 @@ public class ClientStarter {
 		
 		log.info("client open {} client connections.", clients);
 		Thread.sleep(2000);
-		int iTask = 10_0000;
+		int iTask = 100_000;
 		CountDownLatch cdl = new CountDownLatch(iTask);
 		ExecutorService es = Executors.newFixedThreadPool(clients);
 		for (int i = 0; i < iTask; i++) {

@@ -20,7 +20,8 @@ public class ClientConnector {
 	private ClientConnection clientConnection;
 
 	private String connId = null;
-//	private volatile ConnStatus connStatus = null;
+	// require for RESULT_UPDATER
+	private volatile ConnStatus connStatus = null;
 	private static final AtomicReferenceFieldUpdater<ClientConnector, ConnStatus> RESULT_UPDATER = AtomicReferenceFieldUpdater
 			.newUpdater(ClientConnector.class, ConnStatus.class, "connStatus");
 
@@ -36,7 +37,7 @@ public class ClientConnector {
 		clientConnection.startup(clientContext);
 
 		// connecting...
-//		connStatus = ConnStatus.CONNECTING;
+		connStatus = ConnStatus.CONNECTING;
 		updateConnStatus(clientContext, ConnStatus.CONNECTING);
 
 		log.info("client connecting ...");
@@ -80,15 +81,16 @@ public class ClientConnector {
 //		ClientContextHolder.getClientSession(connId).clearSession();
 	}
 
-	public void setStatus(ConnStatus status) {
+	public void setStatus(ClientContext clientContext, ConnStatus status) {
 		if (RESULT_UPDATER.compareAndSet(this, ConnStatus.CONNECTING, status)) {
+			updateConnStatus(clientContext, this.connStatus);
 			synchronized (this) {
 				notifyAll();
 			}
 		}
 	}
 
-	public void updateConnStatus(ClientContext clientContext, ConnStatus status) {
+	private void updateConnStatus(ClientContext clientContext, ConnStatus status) {
 		clientContext.setConnStatus(status);
 		if (ConnStatus.CONNECTED == status) {
 			log.info("auth check passed.");
