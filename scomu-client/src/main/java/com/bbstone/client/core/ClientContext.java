@@ -51,7 +51,9 @@ public class ClientContext {
 	private volatile boolean retry;
 	private AtomicInteger timeoutReqs = new AtomicInteger();
 	
-	
+	// total input(read)/output(write) bytes length in a calculate period
+	private long totalInBytes = 0L;
+	private long totalOutBytes = 0L;
 	
 	
 	
@@ -296,7 +298,37 @@ public class ClientContext {
 		authSuccessSchedulers.clear();
 	}
 
+	public long getTotalInBytes() {
+		return totalInBytes;
+	}
+
+	/**
+	 *  accumulate input(read) bytes
+	 * @param totalInBytes
+	 */
+	void setTotalInBytes(long totalInBytes) {
+		this.totalInBytes = this.totalInBytes + totalInBytes;
+	}
+
+	public long getTotalOutBytes() {
+		return totalOutBytes;
+	}
+
+	/**
+	 * accumulate output(write) bytes
+	 * @param totalOutBytes
+	 */
+	void setTotalOutBytes(long totalOutBytes) {
+		this.totalOutBytes = this.totalOutBytes + totalOutBytes;
+	}
+
+	public void resetTotalInBytes() {
+		this.totalInBytes = 0L;
+	}
 	
+	public void resetTotalOutBytes() {
+		this.totalOutBytes = 0L;
+	}
 	
 	
 

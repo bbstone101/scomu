@@ -53,7 +53,6 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler<CmdMsg.Cmd
 	protected void channelRead0(ChannelHandlerContext ctx, CmdMsg.CmdRsp msg) throws Exception {
 		if (stop)
 			return;
-
 		CmdRspEvent cmdRspEvent = CmdRspEvent.from(msg.getId(), msg.getCmd(), msg.getRetCode(), msg.getRetMsg(),
 				msg.getRetData(), msg.getReqTs(), msg.getRecvTs(), msg.getRspTs(), msg.getConnId(),
 				msg.getAccessToken());
@@ -73,6 +72,7 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler<CmdMsg.Cmd
 			log.error("CmdRsp response message with blank connId.");
 			return;
 		}
+		ClientContextHolder.getContext(connId).setTotalInBytes(msg.toByteArray().length);
 		// dispatch msg to message handler
 		messageDispatcher.dispatch(ctx, clientContext, cmdRspEvent);
 	}

@@ -27,7 +27,8 @@ public class ClientConfig {
 	public static int retryMulti = config().getInt("scomu.conn.retry.intvl.multi", 2);
 	public static int retryMax = config().getInt("scomu.conn.retry.max", 300);
 	
-	public static int heartBeatEnabled = config().getInt("scomu.heartbeat.enabled", 0);
+	public static int heartBeatEnabled = config().getInt("scomu.heartbeat.enabled", 1);
+	public static int speedCalcEnabled = config().getInt("scomu.speed.calc.enabled", 1);
 	
 	// request timeout, unit(millisecond)
 	public static int reqTimeout = config().getInt("scomu.request.timeout", 3000);

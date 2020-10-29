@@ -98,6 +98,11 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 			ClientContextHolder.getHeartBeatExecutor(connId).enableHeartBeat();
 			ClientContextHolder.getHeartBeatExecutor(connId).keepAlived(connId);
 		}
+		
+		if (ConfigConst.ENABLED == ClientConfig.speedCalcEnabled) {
+			ClientContextHolder.getSpeedChangeExecutor(connId).enable();
+			ClientContextHolder.getSpeedChangeExecutor(connId).start(connId);
+		}
 
 		// notify connect threads which waiting for complete
 		ClientContextHolder.getClientConnector(connId).setStatus(clientContext, ConnStatus.CONNECTED);
@@ -107,7 +112,7 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 		log.debug("auth success, connection is ready for transmitting commands...");
 		// execute authSuccessListeners
 		List<AuthSuccessListener> authSuccessListeners = ClientContextHolder.getContext(connId).getAuthSuccessListeners();
-		log.info("notify auth success listeners(total: {}).", authSuccessListeners.size());
+		log.info("notify auth success listeners(total: {}, connId: {}).", authSuccessListeners.size(), connId);
 		for (AuthSuccessListener listener : authSuccessListeners) {
 			listener.invoke(channelHandlerContext);
 		}

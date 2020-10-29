@@ -18,24 +18,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClientConnectionManager {
 	
-	public static ClientContext open(ConnInfo connInfo) {
-		log.info("open new connection. connId: {}", connInfo.connId());
-		ClientConnector clientConnector = ClientContextHolder.initConnector(connInfo.connId());
+//	public static ClientContext open(ConnInfo connInfo) {
+//		log.info("open new connection. connId: {}", connInfo.connId());
+//		ClientConnector clientConnector = ClientContextHolder.initConnector(connInfo.connId());
+//		// new & save context
+//		ClientContext clientContext = ClientContextHolder.newContext(connInfo);
+//		// connect server
+//		clientConnector.connect(clientContext);
+//		
+//		return clientContext;
+//	}
+//
+//	public static ClientContext[] open(ConnInfo[] connInfos) {
+//		List<ClientContext> contexts = new ArrayList<>();
+//		for (ConnInfo connInfo : connInfos) {
+//			contexts.add(open(connInfo));
+//		}
+//		return contexts.toArray(new ClientContext[contexts.size()]);
+//	}
+	
+	
+	public static ClientContext initialContext(ConnInfo connInfo) {
+		log.info("initial a new client context. connId: {}", connInfo.connId());
 		// new & save context
 		ClientContext clientContext = ClientContextHolder.newContext(connInfo);
-		// connect server
+		return clientContext;
+	}
+	
+	public static void connect(ConnInfo connInfo, ClientContext clientContext) {
+		ClientConnector clientConnector = ClientContextHolder.initConnector(connInfo.connId());
 		clientConnector.connect(clientContext);
-		
+	}
+	
+	public static ClientContext initialContextAndConnect(ConnInfo connInfo) {
+		ClientContext clientContext = initialContext(connInfo);
+		connect(connInfo, clientContext);
 		return clientContext;
 	}
 
-	public static ClientContext[] open(ConnInfo[] connInfos) {
-		List<ClientContext> contexts = new ArrayList<>();
-		for (ConnInfo connInfo : connInfos) {
-			contexts.add(open(connInfo));
-		}
-		return contexts.toArray(new ClientContext[contexts.size()]);
-	}
 
 	public static boolean isOpen(String connId) {
 		return ConnStatus.CONNECTED == ClientContextHolder.getContext(connId).getConnStatus();
@@ -49,7 +69,7 @@ public class ClientConnectionManager {
 
 	public static void reopen(ConnInfo connInfo) {
 		close(connInfo.connId());
-		open(connInfo);
+		initialContextAndConnect(connInfo);
 	}
 
 

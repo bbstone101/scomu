@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bbstone.client.core.ext.HeartBeatExecutor;
+import com.bbstone.client.core.ext.SpeedChangeExecutor;
 import com.bbstone.comm.model.ConnInfo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ public class ClientContextHolder {
 	private static Map<String, ClientConnector> clientConnectors = new HashMap<>();
 	private static Map<String, MessageHandlerRegister> messageHandlerRegisters = new HashMap<>();
 	private static Map<String, HeartBeatExecutor> heartBeatExecutors = new HashMap<>();
+	private static Map<String, SpeedChangeExecutor> speedChangeExecutors = new HashMap<>();
 
 	public static ClientContext newContext(ConnInfo connInfo) {
 		if (clientContexts.containsKey(connInfo.connId())) {
@@ -43,6 +45,7 @@ public class ClientContextHolder {
 		log.info("current size of connectors: {}", c);
 		// initial heart beat executor and message handler register
 		heartBeatExecutors.put(connId, new HeartBeatExecutor());
+		speedChangeExecutors.put(connId, new SpeedChangeExecutor());
 		messageHandlerRegisters.put(connId, new MessageHandlerRegister());
 		// return the new connector
 		return clientConnector;
@@ -81,6 +84,9 @@ public class ClientContextHolder {
 		return selectedContext;
 	}
 
+	public static int contextSize() {
+		return clientContexts.size();
+	}
 	public static ClientContext getContext(String connId) {
 		return clientContexts.get(connId);
 	}
@@ -95,6 +101,10 @@ public class ClientContextHolder {
 
 	public static HeartBeatExecutor getHeartBeatExecutor(String connId) {
 		return heartBeatExecutors.get(connId);
+	}
+	
+	public static SpeedChangeExecutor getSpeedChangeExecutor(String connId) {
+		return speedChangeExecutors.get(connId);
 	}
 
 	public static void removeContext(String connId) {

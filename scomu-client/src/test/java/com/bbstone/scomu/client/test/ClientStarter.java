@@ -1,16 +1,20 @@
 package com.bbstone.scomu.client.test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.bbstone.client.api.ClientAPI;
 import com.bbstone.client.core.ClientConnectionManager;
+import com.bbstone.client.core.ClientContext;
+import com.bbstone.client.core.ClientContextHolder;
+import com.bbstone.client.core.ClientUtil;
+import com.bbstone.client.core.ext.AuthSuccessListener;
+import com.bbstone.client.core.ext.SpeedChangeListner;
 import com.bbstone.comm.model.ConnInfo;
 import com.bbstone.comm.util.ConnUtil;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,12 +38,34 @@ public class ClientStarter {
 ////		ThreadViewer.showThreads();
 		
 		int clients = 20;
-		List<ConnInfo> connInfos = new ArrayList<>();
 		for (int i = 0; i < clients; i++ ) {
 			ConnInfo connInfo = ConnUtil.from("127.0.0.1", 8899, "demo", "demopass");
-			connInfos.add(connInfo);
+			ClientContext clientContext = ClientConnectionManager.initialContext(connInfo);
+			ClientContextHolder.getContext(connInfo.getConnId()).addAuthSuccessListener(new AuthSuccessListener() {
+				public void invoke(ChannelHandlerContext ctx) {
+					ClientUtil.addSpeedChangeListner(connInfo.getConnId(), new SpeedChangeListner() {
+						public void onInputSpeedChange(String connId, long speed, String speedUnit) {
+							log.info("======== input speed change =========");
+							log.info("connId: {}, {}{}", connId, speed, speedUnit);
+							log.info("======== input speed change =========");
+							
+						}
+						public void onOuputSpeedChange(String connId, long speed, String speedUnit) {
+							log.info("======== output speed change =========");
+							log.info("connId: {}, {}{}", connId, speed, speedUnit);
+							log.info("======== output speed change =========");
+						}
+					});
+				}
+			});
+			ClientConnectionManager.connect(connInfo, clientContext);
 		}
-		ClientConnectionManager.open(connInfos.toArray(new ConnInfo[connInfos.size()]));
+//		List<ConnInfo> connInfos = new ArrayList<>();
+//		for (int i = 0; i < clients; i++ ) {
+//			ConnInfo connInfo = ConnUtil.from("127.0.0.1", 8899, "demo", "demopass");
+//			connInfos.add(connInfo);
+//		}
+//		ClientConnectionManager.open(connInfos.toArray(new ConnInfo[connInfos.size()]));
 		
 		log.info("client open {} client connections.", clients);
 		Thread.sleep(2000);

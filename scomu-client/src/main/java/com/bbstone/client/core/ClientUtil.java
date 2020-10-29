@@ -2,6 +2,7 @@ package com.bbstone.client.core;
 
 import com.alibaba.fastjson.JSON;
 import com.bbstone.client.core.exception.AuthException;
+import com.bbstone.client.core.ext.SpeedChangeListner;
 import com.bbstone.client.core.model.CmdEvent;
 import com.bbstone.client.core.model.CmdEventFactory;
 import com.bbstone.comm.enums.RetCode;
@@ -99,6 +100,7 @@ public class ClientUtil {
 //				sc.writeAndFlush(cmdReq);
 //				ctx.writeAndFlush(cmdReq);
 			sendReq(ctx, cmdReq);
+			calcOutputBytes(cmdReqEvent.getConnId(), cmdReq.toByteArray().length);
 		} catch (AuthException e1) {
 			log.error("send command request error.", e1);
 			return CmdResult.from(RetCode.FAIL.code(), RetCode.FAIL.descp());
@@ -133,6 +135,7 @@ public class ClientUtil {
 			cmdReq = MessageBuilder.buildCmdReq(cmdReqEvent);
 //				ctx.writeAndFlush(cmdReq);
 			sendReq(ctx, cmdReq);
+			calcOutputBytes(cmdReqEvent.getConnId(), cmdReq.toByteArray().length);
 		} catch (AuthException e) {
 			log.error("send command request error.", e);
 		}
@@ -145,4 +148,12 @@ public class ClientUtil {
 		return cmdEvent;
 	}
 
+	private static void calcOutputBytes(String connId, long outBytes) {
+		ClientContextHolder.getContext(connId).setTotalOutBytes(outBytes);;
+	}
+	
+	
+	public static void addSpeedChangeListner(String connId, SpeedChangeListner scl) {
+		ClientContextHolder.getSpeedChangeExecutor(connId).addSpeedChangeListner(scl);
+	}
 }
