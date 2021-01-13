@@ -18,24 +18,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClientConnectionManager {
 	
-//	public static ClientContext open(ConnInfo connInfo) {
-//		log.info("open new connection. connId: {}", connInfo.connId());
-//		ClientConnector clientConnector = ClientContextHolder.initConnector(connInfo.connId());
-//		// new & save context
-//		ClientContext clientContext = ClientContextHolder.newContext(connInfo);
-//		// connect server
-//		clientConnector.connect(clientContext);
-//		
-//		return clientContext;
-//	}
-//
-//	public static ClientContext[] open(ConnInfo[] connInfos) {
-//		List<ClientContext> contexts = new ArrayList<>();
-//		for (ConnInfo connInfo : connInfos) {
-//			contexts.add(open(connInfo));
-//		}
-//		return contexts.toArray(new ClientContext[contexts.size()]);
-//	}
+	public static ClientContext open(ConnInfo connInfo) {
+		log.info("open new connection. connId: {}", connInfo.connId());
+		ClientConnector clientConnector = ClientContextHolder.initConnector(connInfo.connId());
+		// new & save context
+		ClientContext clientContext = ClientContextHolder.newContext(connInfo);
+		// connect server
+		clientConnector.connect(clientContext);
+		
+		return clientContext;
+	}
+
+	public static ClientContext[] open(ConnInfo[] connInfos) {
+		List<ClientContext> contexts = new ArrayList<>();
+		for (ConnInfo connInfo : connInfos) {
+			contexts.add(open(connInfo));
+		}
+		return contexts.toArray(new ClientContext[contexts.size()]);
+	}
 	
 	
 	public static ClientContext initialContext(ConnInfo connInfo) {

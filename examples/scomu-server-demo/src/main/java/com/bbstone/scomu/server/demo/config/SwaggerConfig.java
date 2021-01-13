@@ -31,7 +31,7 @@ public class SwaggerConfig {
                 .title("SCOMU SERVER DEMO API Doc")
                 .description("API Doc")
 //                .termsOfServiceUrl("localhost:9005/swagger-ui.html")
-//                .contact(new Contact("Swagger UI","localhost:9005/swagger-ui.html","admin@neomind.com"))
+//                .contact(new Contact("Swagger UI","localhost:9005/swagger-ui.html","admin@example.com"))
                 .version("1.0")
                 .build();
     }

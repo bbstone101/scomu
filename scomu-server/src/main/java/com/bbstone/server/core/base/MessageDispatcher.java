@@ -33,15 +33,22 @@ public class MessageDispatcher {
 	
 	private static boolean authCheck(String connId) {
 		ServerAuthInfo authInfo = ServerContext.getServerAuthInfo(connId);
-		if (authInfo == null || StringUtils.isBlank(authInfo.getAccessToken())) {
-			return false;
+		if (StringUtils.isNotBlank(authInfo.getAccessToken())
+				&& isAccessTokenActived(connId, authInfo.getAccessToken())) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 	
 	private static boolean freeAccess(String cmd) {
 		if (StringUtils.isBlank(cmd)) return false;
 		return ServerContext.freeAccessCmds().contains(cmd);
+	}
+	
+	private static boolean isAccessTokenActived(String connId, String accessToken) {
+		// TODO check accessToken in redis (server cluster mode)
+		String storedAT = ServerContext.getServerAuthInfo(connId).getAccessToken();
+		return accessToken.equals(storedAT);
 	}
 
 }

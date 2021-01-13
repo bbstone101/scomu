@@ -117,11 +117,6 @@
 				<artifactId>protobuf-java-util</artifactId>
 				<version>${proto.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.neomind</groupId>
-				<artifactId>comm-socket</artifactId>
-				<version>${comm-socket.version}</version>
-			</dependency>
 
 
 

@@ -25,7 +25,6 @@
             </encoder>
         </appender>
         
-        <logger name="com.neomind.dsa.dao" level="DEBUG"/>
  		<logger name="org.apache.zookeeper" level="warn"/> <!--  去掉日志-->
         <logger name="org.springframework.web.servlet.mvc" level="DEBUG"/>
         <logger name="org.springframework.session.web.http.SessionRepositoryFilter" level="WARN"/> <!--  去掉日志-->

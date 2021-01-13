@@ -43,6 +43,7 @@ public class AuthAnswerMessageHandler implements MessageHandler {
 			
 			// generate accessToken for user(client/connection)
 			String accessToken = ServerUtil.genAccessToken();
+			// TODO save accessToken to redis for cluster mode
 			ServerContext.getServerAuthInfo(cmdReqEvent.getConnId()).setAccessToken(accessToken);
 			
 			String username = ServerContext.getServerAuthInfo(cmdReqEvent.getConnId()).getAuthStartReq().getUsername();
