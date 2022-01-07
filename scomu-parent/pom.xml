@@ -58,7 +58,7 @@
 		<!-- scomu sdk/common -->
 		<scomu.version>0.0.1-SNAPSHOT</scomu.version>
 
-		<proto.version>3.11.0</proto.version>
+		<proto.version>3.16.1</proto.version>
 		<!-- <netty.version>4.1.48.Final</netty.version> -->
 		<netty.version>4.1.51.Final</netty.version>
 
