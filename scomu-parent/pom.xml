@@ -144,7 +144,7 @@
 			<dependency>
 				<groupId>com.alibaba</groupId>
 				<artifactId>fastjson</artifactId>
-				<version>1.2.61</version>
+				<version>1.2.83</version>
 			</dependency>
 
 
@@ -160,7 +160,7 @@
 			<dependency>
 				<groupId>com.alibaba</groupId>
 				<artifactId>fastjson</artifactId>
-				<version>1.2.61</version>
+				<version>1.2.83</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
